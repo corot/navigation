@@ -102,6 +102,9 @@ void InflationLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, 
   unsigned char* master_array = master_grid.getCharMap();
   unsigned int size_x = master_grid.getSizeInCellsX(), size_y = master_grid.getSizeInCellsY();
 
+  // See Issue #137 for a explanation of this horrible hack
+  while (! seen_) ros::Duration(0.001).sleep();
+
   memset(seen_, false, size_x * size_y * sizeof(bool));
 
   // We need to include in the inflation cells outside the bounding
@@ -168,6 +171,8 @@ void InflationLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, 
 inline void InflationLayer::enqueue(unsigned char* grid, unsigned int index, unsigned int mx, unsigned int my,
                                             unsigned int src_x, unsigned int src_y)
 {
+  // See Issue #137 for a explanation of this horrible hack
+  while (! seen_) ros::Duration(0.001).sleep();
 
   //set the cost of the cell being inserted
   if (!seen_[index])
