@@ -80,7 +80,7 @@ private:
 
   std::string global_frame_; ///< @brief The global frame for the costmap
   bool map_received_, map_initialized_;
-  bool first_map_only_;
+  bool first_map_only_;      ///< @brief Store the first static map and reuse it on reinitializing
   bool track_unknown_space_;
   ros::Subscriber map_sub_;
 
