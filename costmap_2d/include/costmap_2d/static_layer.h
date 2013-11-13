@@ -68,6 +68,7 @@ public:
   virtual void matchSize();
 
 private:
+  void initialize(const nav_msgs::OccupancyGridConstPtr& new_map);
   /**
    * @brief  Callback to update the costmap's map from the map_server
    * @param new_map The map to put into the costmap. The origin of the new
@@ -79,8 +80,11 @@ private:
 
   std::string global_frame_; ///< @brief The global frame for the costmap
   bool map_received_, map_initialized_;
+  bool first_map_only_;
   bool track_unknown_space_;
   ros::Subscriber map_sub_;
+
+  nav_msgs::OccupancyGrid::Ptr first_map_;
 
   unsigned char lethal_threshold_, unknown_cost_value_;
 
