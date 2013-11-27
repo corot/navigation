@@ -57,9 +57,11 @@ void InflationLayer::matchSize()
   computeCaches();
 
   unsigned int size_x = costmap->getSizeInCellsX(), size_y = costmap->getSizeInCellsY();
+ROS_ERROR(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  MATCH SIZE 1  %d x %d", size_x, size_y);
   if (seen_)
     delete seen_;
   seen_ = new bool[size_x * size_y];
+ROS_ERROR(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  MATCH SIZE 2  %d x %d", size_x, size_y);
 }
 
 void InflationLayer::updateBounds(double origin_x, double origin_y, double origin_yaw, double* min_x,
@@ -105,7 +107,9 @@ void InflationLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, 
   // See Issue #137 for a explanation of this horrible hack
   while (! seen_) ros::Duration(0.001).sleep();
 
+ROS_ERROR(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  UPDATE_COSTS 1  %d x %d", size_x, size_y);
   memset(seen_, false, size_x * size_y * sizeof(bool));
+ROS_ERROR(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  UPDATE COSTS 2  %d x %d", size_x, size_y);
 
   // We need to include in the inflation cells outside the bounding
   // box min_i...max_j, by the amount cell_inflation_radius_.  Cells
