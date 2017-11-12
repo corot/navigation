@@ -206,15 +206,11 @@ namespace navfn {
       const geometry_msgs::PoseStamped& goal, double tolerance, std::vector<geometry_msgs::PoseStamped>& plan){
     double cost;
     std::string msg;
-    std::vector<geometry_msgs::PoseStamped> dummy1;
-    std::vector<double> dummy2;
-    return 10 > makePlan(start, goal, dummy1, default_tolerance_, dummy2, plan, cost, msg);
+    return 10 > makePlan(start, goal, default_tolerance_, plan, cost, msg);
   }
 
   uint32_t NavfnROS::makePlan(const geometry_msgs::PoseStamped& start, const geometry_msgs::PoseStamped& goal,
-                              const std::vector<geometry_msgs::PoseStamped>& waypoints,
-                              double goal_tolerance, const std::vector<double>& waypoints_tolerance,
-                              std::vector<geometry_msgs::PoseStamped>& plan, double& cost,
+                              double tolerance, std::vector<geometry_msgs::PoseStamped>& plan, double& cost,
                               std::string& message) {
     boost::mutex::scoped_lock lock(mutex_);
     if(!initialized_){
@@ -288,7 +284,7 @@ namespace navfn {
     wy = goal.pose.position.y;
 
     if(!costmap_->worldToMap(wx, wy, mx, my)){
-      if(goal_tolerance <= 0.0){
+      if(tolerance <= 0.0){
         message = "The goal sent to the navfn planner is off the global costmap";
         ROS_WARN_THROTTLE(1.0, "The goal sent to the navfn planner is off the global costmap. Planning will always fail to this goal.");
         return move_base_flex_msgs::GetPathResult::INVALID_GOAL;
@@ -314,11 +310,11 @@ namespace navfn {
     bool found_legal = false;
     double best_sdist = DBL_MAX;
 
-    p.pose.position.y = goal.pose.position.y - goal_tolerance;
+    p.pose.position.y = goal.pose.position.y - tolerance;
 
-    while(p.pose.position.y <= goal.pose.position.y + goal_tolerance){
-      p.pose.position.x = goal.pose.position.x - goal_tolerance;
-      while(p.pose.position.x <= goal.pose.position.x + goal_tolerance){
+    while(p.pose.position.y <= goal.pose.position.y + tolerance){
+      p.pose.position.x = goal.pose.position.x - tolerance;
+      while(p.pose.position.x <= goal.pose.position.x + tolerance){
         double potential = getPointPotential(p.pose.position);
         double sdist = sq_distance(p, goal);
         if(potential < POT_HIGH && sdist < best_sdist){

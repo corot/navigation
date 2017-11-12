@@ -114,9 +114,7 @@ namespace navfn {
           const geometry_msgs::PoseStamped& goal, double tolerance, std::vector<geometry_msgs::PoseStamped>& plan);
 
       uint32_t makePlan(const geometry_msgs::PoseStamped& start, const geometry_msgs::PoseStamped& goal,
-                        const std::vector<geometry_msgs::PoseStamped>& waypoints,
-                        double goal_tolerance, const std::vector<double>& waypoints_tolerance,
-                        std::vector<geometry_msgs::PoseStamped>& plan, double& cost,
+                        double tolerance, std::vector<geometry_msgs::PoseStamped>& plan, double& cost,
                         std::string& message);
 
       /**
