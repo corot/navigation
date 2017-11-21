@@ -54,7 +54,7 @@
 
 
 //register this planner as a BaseLocalPlanner plugin
-PLUGINLIB_EXPORT_CLASS(base_local_planner::TrajectoryPlannerROS, move_base_flex_core::LocalPlanner)
+PLUGINLIB_EXPORT_CLASS(base_local_planner::TrajectoryPlannerROS, move_base_flex_core::MoveBaseController)
 
 namespace base_local_planner {
 
@@ -79,10 +79,10 @@ namespace base_local_planner {
       world_model_(NULL), tc_(NULL), costmap_ros_(NULL), tf_(NULL), setup_(false), initialized_(false), odom_helper_("odom") {
 
       //initialize the planner
-      initialize(name, tf, costmap_ros);
+      mbfInitialize(name, tf, costmap_ros);
   }
 
-  void TrajectoryPlannerROS::initialize(
+  void TrajectoryPlannerROS::mbfInitialize(
       std::string name,
       tf::TransformListener* tf,
       costmap_2d::Costmap2DROS* costmap_ros){
@@ -353,7 +353,7 @@ namespace base_local_planner {
 
   }
 
-  bool TrajectoryPlannerROS::setPlan(const std::vector<geometry_msgs::PoseStamped>& orig_global_plan){
+  bool TrajectoryPlannerROS::mbfSetPath(const std::vector<geometry_msgs::PoseStamped>& orig_global_plan){
     if (! isInitialized()) {
       ROS_ERROR("This planner has not been initialized, please call initialize() before using this planner");
       return false;
@@ -370,7 +370,7 @@ namespace base_local_planner {
     return true;
   }
 
-  uint32_t TrajectoryPlannerROS::computeVelocityCommands(geometry_msgs::TwistStamped& cmd_vel, std::string& message){
+  uint32_t TrajectoryPlannerROS::mbfComputeVelocity(geometry_msgs::TwistStamped& cmd_vel, std::string& message){
     if (! isInitialized()) {
       ROS_ERROR("This planner has not been initialized, please call initialize() before using this planner");
       return move_base_flex_msgs::ExePathResult::NOT_INITIALIZED;
@@ -588,7 +588,7 @@ namespace base_local_planner {
     return -1.0;
   }
 
-  bool TrajectoryPlannerROS::isGoalReached() {
+  bool TrajectoryPlannerROS::mbfIsGoalReached() {
     if (! isInitialized()) {
       ROS_ERROR("This planner has not been initialized, please call initialize() before using this planner");
       return false;

@@ -44,7 +44,7 @@
 #include <pcl_conversions/pcl_conversions.h>
 
 //register this planner as a BaseGlobalPlanner plugin
-PLUGINLIB_DECLARE_CLASS(navfn, NavfnROS, navfn::NavfnROS, move_base_flex_core::GlobalPlanner)
+PLUGINLIB_DECLARE_CLASS(navfn, NavfnROS, navfn::NavfnROS, move_base_flex_core::MoveBasePlanner)
 
 namespace navfn {
 
@@ -54,7 +54,7 @@ namespace navfn {
   NavfnROS::NavfnROS(std::string name, costmap_2d::Costmap2DROS* costmap_ros)
     : costmap_(NULL),  planner_(), initialized_(false), allow_unknown_(true) {
       //initialize the planner
-      initialize(name, costmap_ros);
+      mbfInitialize(name, costmap_ros);
   }
 
   NavfnROS::NavfnROS(std::string name, costmap_2d::Costmap2D* costmap, std::string global_frame)
@@ -96,7 +96,7 @@ namespace navfn {
       ROS_WARN("This planner has already been initialized, you can't call it twice, doing nothing");
   }
 
-  void NavfnROS::initialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros){
+  void NavfnROS::mbfInitialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros){
     initialize(name, costmap_ros->getCostmap(), costmap_ros->getGlobalFrameID());
   }
 
@@ -197,21 +197,21 @@ namespace navfn {
     wy = costmap_->getOriginY() + my * costmap_->getResolution();
   }
 
-  bool NavfnROS::makePlan(const geometry_msgs::PoseStamped& start, 
+  bool NavfnROS::makePlan(const geometry_msgs::PoseStamped& start,
       const geometry_msgs::PoseStamped& goal, std::vector<geometry_msgs::PoseStamped>& plan){
     return makePlan(start, goal, default_tolerance_, plan);
   }
 
-  bool NavfnROS::makePlan(const geometry_msgs::PoseStamped& start, 
+  bool NavfnROS::makePlan(const geometry_msgs::PoseStamped& start,
       const geometry_msgs::PoseStamped& goal, double tolerance, std::vector<geometry_msgs::PoseStamped>& plan){
     double cost;
     std::string msg;
-    return 10 > makePlan(start, goal, default_tolerance_, plan, cost, msg);
+    return 10 > mbfComputePath(start, goal, default_tolerance_, plan, cost, msg);
   }
 
-  uint32_t NavfnROS::makePlan(const geometry_msgs::PoseStamped& start, const geometry_msgs::PoseStamped& goal,
-                              double tolerance, std::vector<geometry_msgs::PoseStamped>& plan, double& cost,
-                              std::string& message) {
+  uint32_t NavfnROS::mbfComputePath(const geometry_msgs::PoseStamped& start, const geometry_msgs::PoseStamped& goal,
+                                    double tolerance, std::vector<geometry_msgs::PoseStamped>& plan, double& cost,
+                                    std::string& message) {
     boost::mutex::scoped_lock lock(mutex_);
     if(!initialized_){
       message = "This planner has not been initialized yet, but it is being used, please call initialize() before use";

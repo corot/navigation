@@ -38,7 +38,7 @@
 #ifndef ABSTRACT_LOCAL_PLANNER_ODOM_H_
 #define ABSTRACT_LOCAL_PLANNER_ODOM_H_
 
-#include <move_base_flex_core/local_planner.h>
+#include <move_base_flex_core/move_base_controller.h>
 
 #include <boost/thread.hpp>
 

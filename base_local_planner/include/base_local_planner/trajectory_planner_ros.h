@@ -65,7 +65,7 @@
 
 #include <angles/angles.h>
 
-#include <move_base_flex_core/local_planner.h>
+#include <move_base_flex_core/move_base_controller.h>
 
 #include <dynamic_reconfigure/server.h>
 #include <base_local_planner/BaseLocalPlannerConfig.h>
@@ -77,7 +77,7 @@ namespace base_local_planner {
    * @class TrajectoryPlannerROS
    * @brief A ROS wrapper for the trajectory controller that queries the param server to construct a controller
    */
-  class TrajectoryPlannerROS : public move_base_flex_core::LocalPlanner {
+  class TrajectoryPlannerROS : public move_base_flex_core::MoveBaseController {
     public:
       /**
        * @brief  Default constructor for the ros wrapper
@@ -100,8 +100,8 @@ namespace base_local_planner {
        * @param tf A pointer to a transform listener
        * @param costmap The cost map to use for assigning costs to trajectories
        */
-      void initialize(std::string name, tf::TransformListener* tf,
-          costmap_2d::Costmap2DROS* costmap_ros);
+      void mbfInitialize(std::string name, tf::TransformListener* tf,
+                         costmap_2d::Costmap2DROS* costmap_ros);
 
       /**
        * @brief  Destructor for the wrapper
@@ -114,20 +114,20 @@ namespace base_local_planner {
        * @param cmd_vel Will be filled with the velocity command to be passed to the robot base
        * @return True if a valid trajectory was found, false otherwise
        */
-      uint32_t computeVelocityCommands(geometry_msgs::TwistStamped& cmd_vel, std::string& message);
+      uint32_t mbfComputeVelocity(geometry_msgs::TwistStamped& cmd_vel, std::string& message);
 
       /**
        * @brief  Set the plan that the controller is following
        * @param orig_global_plan The plan to pass to the controller
        * @return True if the plan was updated successfully, false otherwise
        */
-      bool setPlan(const std::vector<geometry_msgs::PoseStamped>& orig_global_plan);
+      bool mbfSetPath(const std::vector<geometry_msgs::PoseStamped>& orig_global_plan);
 
       /**
        * @brief  Check if the goal pose has been achieved
        * @return True if achieved, false otherwise
        */
-      bool isGoalReached();
+      bool mbfIsGoalReached();
 
       /**
        * @brief  Generate and score a single trajectory

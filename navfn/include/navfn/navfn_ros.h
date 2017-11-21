@@ -45,7 +45,7 @@
 #include <nav_msgs/Path.h>
 #include <tf/transform_datatypes.h>
 #include <vector>
-#include <move_base_flex_core/global_planner.h>
+#include <move_base_flex_core/move_base_planner.h>
 #include <nav_msgs/GetPlan.h>
 #include <navfn/potarr_point.h>
 #include <pcl_ros/publisher.h>
@@ -55,7 +55,7 @@ namespace navfn {
    * @class NavfnROS
    * @brief Provides a ROS wrapper for the navfn planner which runs a fast, interpolated navigation function on a costmap.
    */
-  class NavfnROS : public move_base_flex_core::GlobalPlanner {
+  class NavfnROS : public move_base_flex_core::MoveBasePlanner {
     public:
       /**
        * @brief  Default constructor for the NavFnROS object
@@ -82,7 +82,7 @@ namespace navfn {
        * @param  name The name of this planner
        * @param  costmap A pointer to the ROS wrapper of the costmap to use for planning
        */
-      void initialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros);
+      void mbfInitialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros);
 
       /**
        * @brief  Initialization function for the NavFnROS object
@@ -99,7 +99,7 @@ namespace navfn {
        * @param plan The plan... filled by the planner
        * @return True if a valid plan was found, false otherwise
        */
-      bool makePlan(const geometry_msgs::PoseStamped& start, 
+      bool makePlan(const geometry_msgs::PoseStamped& start,
           const geometry_msgs::PoseStamped& goal, std::vector<geometry_msgs::PoseStamped>& plan);
 
       /**
@@ -110,12 +110,12 @@ namespace navfn {
        * @param plan The plan... filled by the planner
        * @return True if a valid plan was found, false otherwise
        */
-      bool makePlan(const geometry_msgs::PoseStamped& start, 
+      bool makePlan(const geometry_msgs::PoseStamped& start,
           const geometry_msgs::PoseStamped& goal, double tolerance, std::vector<geometry_msgs::PoseStamped>& plan);
 
-      uint32_t makePlan(const geometry_msgs::PoseStamped& start, const geometry_msgs::PoseStamped& goal,
-                        double tolerance, std::vector<geometry_msgs::PoseStamped>& plan, double& cost,
-                        std::string& message);
+      uint32_t mbfComputePath(const geometry_msgs::PoseStamped& start, const geometry_msgs::PoseStamped& goal,
+                              double tolerance, std::vector<geometry_msgs::PoseStamped>& plan, double& cost,
+                              std::string& message);
 
       /**
        * @brief  Computes the full navigation function for the map given a point in the world to start from

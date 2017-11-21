@@ -1,5 +1,5 @@
 <library path="lib/libnavfn">
-  <class name="navfn/NavfnROS" type="navfn::NavfnROS" base_class_type="move_base_flex_core::GlobalPlanner">
+  <class name="navfn/NavfnROS" type="navfn::NavfnROS" base_class_type="move_base_flex_core::MoveBasePlanner">
     <description>
       A implementation of a grid based planner using Dijkstra
     </description>
