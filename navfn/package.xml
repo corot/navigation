@@ -27,6 +27,7 @@
     <build_depend>message_generation</build_depend>
     <build_depend>move_base_flex_core</build_depend>
     <build_depend>move_base_flex_msgs</build_depend>
+    <build_depend>nav_core</build_depend>
     <build_depend>nav_msgs</build_depend>
     <build_depend>netpbm</build_depend> <!-- This is a test dependency -->
     <build_depend>pcl_conversions</build_depend>
@@ -42,6 +43,7 @@
     <run_depend>message_runtime</run_depend>
     <run_depend>move_base_flex_core</run_depend>
     <run_depend>move_base_flex_msgs</run_depend>
+    <run_depend>nav_core</run_depend>
     <run_depend>nav_msgs</run_depend>
     <run_depend>pcl_conversions</run_depend>
     <run_depend>pcl_ros</run_depend>
@@ -54,6 +56,7 @@
     <test_depend>rosunit</test_depend>
 
     <export>
+        <nav_core plugin="${prefix}/bgp_plugin.xml" />
         <move_base_flex_core plugin="${prefix}/bgp_plugin.xml" />
     </export>
 </package>

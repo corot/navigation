@@ -9,6 +9,7 @@ find_package(catkin REQUIRED
         message_generation
         move_base_flex_core
         move_base_flex_msgs
+        nav_core
         nav_msgs
         pcl_conversions
         pcl_ros
@@ -54,6 +55,7 @@ catkin_package(
         message_runtime
         move_base_flex_core
         move_base_flex_msgs
+        nav_core
         nav_msgs
         pluginlib
         roscpp

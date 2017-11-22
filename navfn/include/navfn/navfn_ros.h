@@ -45,6 +45,7 @@
 #include <nav_msgs/Path.h>
 #include <tf/transform_datatypes.h>
 #include <vector>
+#include <nav_core/base_global_planner.h>
 #include <move_base_flex_core/move_base_planner.h>
 #include <nav_msgs/GetPlan.h>
 #include <navfn/potarr_point.h>
@@ -55,9 +56,45 @@ namespace navfn {
    * @class NavfnROS
    * @brief Provides a ROS wrapper for the navfn planner which runs a fast, interpolated navigation function on a costmap.
    */
-  class NavfnROS : public move_base_flex_core::MoveBasePlanner {
+  class NavfnROS : public move_base_flex_core::MoveBasePlanner{
     public:
-      /**
+
+//    virtual bool makePlan(const geometry_msgs::PoseStamped& start,
+//        const geometry_msgs::PoseStamped& goal, std::vector<geometry_msgs::PoseStamped>& plan)
+//    {
+//      double cost;
+//      std::string message;
+//      return mbfComputePath(start, goal, 0.0, plan, cost, message) == 0;
+//    }
+//
+//    /**
+//     * @brief Given a goal pose in the world, compute a plan
+//     * @param start The start pose
+//     * @param goal The goal pose
+//     * @param plan The plan... filled by the planner
+//     * @param cost The plans calculated cost
+//     * @return True if a valid plan was found, false otherwise
+//     */
+//    virtual bool makePlan(const geometry_msgs::PoseStamped& start,
+//                          const geometry_msgs::PoseStamped& goal, std::vector<geometry_msgs::PoseStamped>& plan,
+//                          double& cost)
+//    {
+//      std::string message;
+//      return mbfComputePath(start, goal, 0.0, plan, cost, message) == 0;
+//    }
+//
+//    /**
+//     * @brief  Initialization function for the BaseGlobalPlanner
+//     * @param  name The name of this planner
+//     * @param  costmap_ros A pointer to the ROS wrapper of the costmap to use for planning
+//     */
+//    virtual void initialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros)
+//    {
+//      mbfInitialize(name, costmap_ros);
+//    }
+
+
+    /**
        * @brief  Default constructor for the NavFnROS object
        */
       NavfnROS();
@@ -82,7 +119,7 @@ namespace navfn {
        * @param  name The name of this planner
        * @param  costmap A pointer to the ROS wrapper of the costmap to use for planning
        */
-      void mbfInitialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros);
+      void initialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros);
 
       /**
        * @brief  Initialization function for the NavFnROS object
@@ -113,7 +150,7 @@ namespace navfn {
       bool makePlan(const geometry_msgs::PoseStamped& start,
           const geometry_msgs::PoseStamped& goal, double tolerance, std::vector<geometry_msgs::PoseStamped>& plan);
 
-      uint32_t mbfComputePath(const geometry_msgs::PoseStamped& start, const geometry_msgs::PoseStamped& goal,
+      uint32_t makePlan(const geometry_msgs::PoseStamped& start, const geometry_msgs::PoseStamped& goal,
                               double tolerance, std::vector<geometry_msgs::PoseStamped>& plan, double& cost,
                               std::string& message);
 
