@@ -38,8 +38,6 @@
 #ifndef ABSTRACT_LOCAL_PLANNER_ODOM_H_
 #define ABSTRACT_LOCAL_PLANNER_ODOM_H_
 
-#include <move_base_flex_core/local_planner.h>
-
 #include <boost/thread.hpp>
 
 #include <costmap_2d/costmap_2d.h>
@@ -47,6 +45,7 @@
 #include <tf/transform_listener.h>
 
 #include <base_local_planner/local_planner_limits.h>
+#include <mbf_costmap_core/costmap_controller.h>
 
 
 namespace base_local_planner {

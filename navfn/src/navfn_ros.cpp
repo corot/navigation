@@ -39,16 +39,20 @@
 #include <tf/transform_listener.h>
 #include <costmap_2d/cost_values.h>
 #include <costmap_2d/costmap_2d.h>
-#include <move_base_flex_msgs/GetPathAction.h>
+#include <mbf_msgs/GetPathAction.h>
+#include <mbf_costmap_core/costmap_planner.h>
+#include <nav_core/base_global_planner.h>
 
 #include <pcl_conversions/pcl_conversions.h>
 
-//register this planner as a BaseGlobalPlanner plugin
-PLUGINLIB_DECLARE_CLASS(navfn, NavfnROS, navfn::NavfnROS, move_base_flex_core::GlobalPlanner)
+//register this planner both as a nav_core-based BaseGlobalPlanner and as a mbf_costmap_core-based
+//CostmapPlanner plugin to achieve dual move_base and move_base_flex compatibility
+PLUGINLIB_DECLARE_CLASS(navfn, NavfnROS, navfn::NavfnROS, mbf_costmap_core::CostmapPlanner)
+PLUGINLIB_DECLARE_CLASS(navfn, NavfnROS, navfn::NavfnROS, nav_core::BaseGlobalPlanner)
 
 namespace navfn {
 
-  NavfnROS::NavfnROS() 
+  NavfnROS::NavfnROS()
     : costmap_(NULL),  planner_(), initialized_(false), allow_unknown_(true) {}
 
   NavfnROS::NavfnROS(std::string name, costmap_2d::Costmap2DROS* costmap_ros)
@@ -190,19 +194,19 @@ namespace navfn {
     resp.plan.header.frame_id = global_frame_;
 
     return true;
-  } 
+  }
 
   void NavfnROS::mapToWorld(double mx, double my, double& wx, double& wy) {
     wx = costmap_->getOriginX() + mx * costmap_->getResolution();
     wy = costmap_->getOriginY() + my * costmap_->getResolution();
   }
 
-  bool NavfnROS::makePlan(const geometry_msgs::PoseStamped& start, 
+  bool NavfnROS::makePlan(const geometry_msgs::PoseStamped& start,
       const geometry_msgs::PoseStamped& goal, std::vector<geometry_msgs::PoseStamped>& plan){
     return makePlan(start, goal, default_tolerance_, plan);
   }
 
-  bool NavfnROS::makePlan(const geometry_msgs::PoseStamped& start, 
+  bool NavfnROS::makePlan(const geometry_msgs::PoseStamped& start,
       const geometry_msgs::PoseStamped& goal, double tolerance, std::vector<geometry_msgs::PoseStamped>& plan){
     double cost;
     std::string msg;
@@ -216,7 +220,7 @@ namespace navfn {
     if(!initialized_){
       message = "This planner has not been initialized yet, but it is being used, please call initialize() before use";
       ROS_ERROR("This planner has not been initialized yet, but it is being used, please call initialize() before use");
-      return move_base_flex_msgs::GetPathResult::NOT_INITIALIZED;
+      return mbf_msgs::GetPathResult::NOT_INITIALIZED;
     }
 
     //clear the plan, just in case
@@ -227,16 +231,16 @@ namespace navfn {
     //until tf can handle transforming things that are way in the past... we'll require the goal to be in our global frame
     if(tf::resolve(tf_prefix_, goal.header.frame_id) != tf::resolve(tf_prefix_, global_frame_)){
       message = "The goal pose passed to this planner must be in the planner's global frame";
-      ROS_ERROR("The goal pose passed to this planner must be in the %s frame.  It is instead in the %s frame.", 
+      ROS_ERROR("The goal pose passed to this planner must be in the %s frame.  It is instead in the %s frame.",
                 tf::resolve(tf_prefix_, global_frame_).c_str(), tf::resolve(tf_prefix_, goal.header.frame_id).c_str());
-      return move_base_flex_msgs::GetPathResult::INVALID_GOAL;
+      return mbf_msgs::GetPathResult::INVALID_GOAL;
     }
 
     if(tf::resolve(tf_prefix_, start.header.frame_id) != tf::resolve(tf_prefix_, global_frame_)){
       message = "The start pose passed to this planner must be in the planner's global frame";
-      ROS_ERROR("The start pose passed to this planner must be in the %s frame.  It is instead in the %s frame.", 
+      ROS_ERROR("The start pose passed to this planner must be in the %s frame.  It is instead in the %s frame.",
                 tf::resolve(tf_prefix_, global_frame_).c_str(), tf::resolve(tf_prefix_, start.header.frame_id).c_str());
-      return move_base_flex_msgs::GetPathResult::INVALID_START;
+      return mbf_msgs::GetPathResult::INVALID_START;
     }
 
     double wx = start.pose.position.x;
@@ -246,7 +250,7 @@ namespace navfn {
     if(!costmap_->worldToMap(wx, wy, mx, my)){
       message = "The robot's start position is off the global costmap";
       ROS_WARN("The robot's start position is off the global costmap. Planning will always fail, are you sure the robot has been properly localized?");
-      return move_base_flex_msgs::GetPathResult::INVALID_START;
+      return mbf_msgs::GetPathResult::INVALID_START;
     }
 
     //clear the starting cell within the costmap because we know it can't be an obstacle
@@ -287,7 +291,7 @@ namespace navfn {
       if(tolerance <= 0.0){
         message = "The goal sent to the navfn planner is off the global costmap";
         ROS_WARN_THROTTLE(1.0, "The goal sent to the navfn planner is off the global costmap. Planning will always fail to this goal.");
-        return move_base_flex_msgs::GetPathResult::INVALID_GOAL;
+        return mbf_msgs::GetPathResult::INVALID_GOAL;
       }
       mx = 0;
       my = 0;
@@ -373,10 +377,10 @@ namespace navfn {
 
     if (plan.empty()){
       message = "No plan found";
-      return move_base_flex_msgs::GetPathResult::NO_PATH_FOUND;
+      return mbf_msgs::GetPathResult::NO_PATH_FOUND;
     }
 
-    return move_base_flex_msgs::GetPathResult::SUCCESS;
+    return mbf_msgs::GetPathResult::SUCCESS;
   }
 
   void NavfnROS::publishPlan(const std::vector<geometry_msgs::PoseStamped>& path, double r, double g, double b, double a){
@@ -385,7 +389,7 @@ namespace navfn {
       return;
     }
 
-    //create a message for the plan 
+    //create a message for the plan
     nav_msgs::Path gui_path;
     gui_path.poses.resize(path.size());
 
@@ -414,7 +418,7 @@ namespace navfn {
 
     //until tf can handle transforming things that are way in the past... we'll require the goal to be in our global frame
     if(tf::resolve(tf_prefix_, goal.header.frame_id) != tf::resolve(tf_prefix_, global_frame_)){
-      ROS_ERROR("The goal pose passed to this planner must be in the %s frame.  It is instead in the %s frame.", 
+      ROS_ERROR("The goal pose passed to this planner must be in the %s frame.  It is instead in the %s frame.",
                 tf::resolve(tf_prefix_, global_frame_).c_str(), tf::resolve(tf_prefix_, goal.header.frame_id).c_str());
       return false;
     }

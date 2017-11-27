@@ -34,6 +34,7 @@
   <run_depend>roscpp</run_depend>
   <run_depend>tf</run_depend>
   <export>
+      <mbf_abstract_core plugin="${prefix}/bgp_plugin.xml" />
       <nav_core plugin="${prefix}/bgp_plugin.xml" />
   </export>
 

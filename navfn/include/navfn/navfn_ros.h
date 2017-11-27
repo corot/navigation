@@ -45,7 +45,8 @@
 #include <nav_msgs/Path.h>
 #include <tf/transform_datatypes.h>
 #include <vector>
-#include <move_base_flex_core/global_planner.h>
+#include <nav_core/base_global_planner.h>
+#include <mbf_costmap_core/costmap_planner.h>
 #include <nav_msgs/GetPlan.h>
 #include <navfn/potarr_point.h>
 #include <pcl_ros/publisher.h>
@@ -55,7 +56,7 @@ namespace navfn {
    * @class NavfnROS
    * @brief Provides a ROS wrapper for the navfn planner which runs a fast, interpolated navigation function on a costmap.
    */
-  class NavfnROS : public move_base_flex_core::GlobalPlanner {
+  class NavfnROS : public nav_core::BaseGlobalPlanner, public mbf_costmap_core::CostmapPlanner {
     public:
       /**
        * @brief  Default constructor for the NavFnROS object
@@ -94,23 +95,23 @@ namespace navfn {
 
       /**
        * @brief Given a goal pose in the world, compute a plan
-       * @param start The start pose 
-       * @param goal The goal pose 
+       * @param start The start pose
+       * @param goal The goal pose
        * @param plan The plan... filled by the planner
        * @return True if a valid plan was found, false otherwise
        */
-      bool makePlan(const geometry_msgs::PoseStamped& start, 
+      bool makePlan(const geometry_msgs::PoseStamped& start,
           const geometry_msgs::PoseStamped& goal, std::vector<geometry_msgs::PoseStamped>& plan);
 
       /**
        * @brief Given a goal pose in the world, compute a plan
-       * @param start The start pose 
-       * @param goal The goal pose 
+       * @param start The start pose
+       * @param goal The goal pose
        * @param tolerance The tolerance on the goal point for the planner
        * @param plan The plan... filled by the planner
        * @return True if a valid plan was found, false otherwise
        */
-      bool makePlan(const geometry_msgs::PoseStamped& start, 
+      bool makePlan(const geometry_msgs::PoseStamped& start,
           const geometry_msgs::PoseStamped& goal, double tolerance, std::vector<geometry_msgs::PoseStamped>& plan);
 
       uint32_t makePlan(const geometry_msgs::PoseStamped& start, const geometry_msgs::PoseStamped& goal,
@@ -119,7 +120,7 @@ namespace navfn {
 
       /**
        * @brief  Computes the full navigation function for the map given a point in the world to start from
-       * @param world_point The point to use for seeding the navigation function 
+       * @param world_point The point to use for seeding the navigation function
        * @return True if the navigation function was computed successfully, false otherwise
        */
       bool computePotential(const geometry_msgs::Point& world_point);
@@ -134,21 +135,21 @@ namespace navfn {
 
       /**
        * @brief Get the potential, or naviagation cost, at a given point in the world (Note: You should call computePotential first)
-       * @param world_point The point to get the potential for 
+       * @param world_point The point to get the potential for
        * @return The navigation function's value at that point in the world
        */
       double getPointPotential(const geometry_msgs::Point& world_point);
 
       /**
        * @brief Check for a valid potential value at a given point in the world (Note: You should call computePotential first)
-       * @param world_point The point to get the potential for 
+       * @param world_point The point to get the potential for
        * @return True if the navigation function is valid at that point in the world, false otherwise
        */
       bool validPointPotential(const geometry_msgs::Point& world_point);
 
       /**
        * @brief Check for a valid potential value at a given point in the world (Note: You should call computePotential first)
-       * @param world_point The point to get the potential for 
+       * @param world_point The point to get the potential for
        * @param tolerance The tolerance on searching around the world_point specified
        * @return True if the navigation function is valid at that point in the world, false otherwise
        */
@@ -162,6 +163,10 @@ namespace navfn {
       ~NavfnROS(){}
 
       bool makePlanService(nav_msgs::GetPlan::Request& req, nav_msgs::GetPlan::Response& resp);
+
+      bool cancel(){
+        return false;
+      }
 
     protected:
 

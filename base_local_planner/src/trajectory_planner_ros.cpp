@@ -49,12 +49,14 @@
 
 #include <base_local_planner/goal_functions.h>
 #include <nav_msgs/Path.h>
-#include <move_base_flex_msgs/ExePathAction.h>
+#include <mbf_msgs/ExePathAction.h>
 
 
 
-//register this planner as a BaseLocalPlanner plugin
-PLUGINLIB_EXPORT_CLASS(base_local_planner::TrajectoryPlannerROS, move_base_flex_core::LocalPlanner)
+//register this planner both as a nav_core-based BaseLocalPlanner and as a mbf_costmap_core-based
+//CostmapController plugin to achieve dual move_base and move_base_flex compatibility
+PLUGINLIB_EXPORT_CLASS(base_local_planner::TrajectoryPlannerROS, mbf_costmap_core::CostmapController)
+PLUGINLIB_EXPORT_CLASS(base_local_planner::TrajectoryPlannerROS, nav_core::BaseLocalPlanner)
 
 namespace base_local_planner {
 
@@ -292,7 +294,7 @@ namespace base_local_planner {
 
     //we do want to check whether or not the command is valid
     double yaw = tf::getYaw(global_pose.getRotation());
-    bool valid_cmd = tc_->checkTrajectory(global_pose.getOrigin().getX(), global_pose.getOrigin().getY(), yaw, 
+    bool valid_cmd = tc_->checkTrajectory(global_pose.getOrigin().getX(), global_pose.getOrigin().getY(), yaw,
         robot_vel.getOrigin().getX(), robot_vel.getOrigin().getY(), vel_yaw, vx, vy, vth);
 
     //if we have a valid command, we'll pass it on, otherwise we'll command all zeros
@@ -328,7 +330,7 @@ namespace base_local_planner {
     v_theta_samp = sign(v_theta_samp) * std::min(std::max(fabs(v_theta_samp), min_acc_vel), max_acc_vel);
 
     //we also want to make sure to send a velocity that allows us to stop when we reach the goal given our acceleration limits
-    double max_speed_to_stop = sqrt(2 * acc_lim_theta_ * fabs(ang_diff)); 
+    double max_speed_to_stop = sqrt(2 * acc_lim_theta_ * fabs(ang_diff));
 
     v_theta_samp = sign(v_theta_samp) * std::min(max_speed_to_stop, fabs(v_theta_samp));
 
@@ -338,7 +340,7 @@ namespace base_local_planner {
       : std::max( min_vel_th_, std::min( -1.0 * min_in_place_vel_th_, v_theta_samp ));
 
     //we still want to lay down the footprint of the robot and check if the action is legal
-    bool valid_cmd = tc_->checkTrajectory(global_pose.getOrigin().getX(), global_pose.getOrigin().getY(), yaw, 
+    bool valid_cmd = tc_->checkTrajectory(global_pose.getOrigin().getX(), global_pose.getOrigin().getY(), yaw,
         robot_vel.getOrigin().getX(), robot_vel.getOrigin().getY(), vel_yaw, 0.0, 0.0, v_theta_samp);
 
     ROS_DEBUG("Moving to desired goal orientation, th cmd: %.2f, valid_cmd: %d", v_theta_samp, valid_cmd);
@@ -362,7 +364,7 @@ namespace base_local_planner {
     //reset the global plan
     global_plan_.clear();
     global_plan_ = orig_global_plan;
-    
+
     //when we get a new plan, we also want to clear any latch we may have on goal tolerances
     xy_tolerance_latch_ = false;
     //reset the at goal flag
@@ -373,20 +375,20 @@ namespace base_local_planner {
   uint32_t TrajectoryPlannerROS::computeVelocityCommands(geometry_msgs::TwistStamped& cmd_vel, std::string& message){
     if (! isInitialized()) {
       ROS_ERROR("This planner has not been initialized, please call initialize() before using this planner");
-      return move_base_flex_msgs::ExePathResult::NOT_INITIALIZED;
+      return mbf_msgs::ExePathResult::NOT_INITIALIZED;
     }
 
     std::vector<geometry_msgs::PoseStamped> local_plan;
     tf::Stamped<tf::Pose> global_pose;
     if (!costmap_ros_->getRobotPose(global_pose)) {
-      return move_base_flex_msgs::ExePathResult::TF_ERROR;
+      return mbf_msgs::ExePathResult::TF_ERROR;
     }
 
     std::vector<geometry_msgs::PoseStamped> transformed_plan;
     //get the global plan in our frame
     if (!transformGlobalPlan(*tf_, global_plan_, global_pose, *costmap_, global_frame_, transformed_plan)) {
       ROS_WARN("Could not transform the global plan to the frame of the controller");
-      return move_base_flex_msgs::ExePathResult::INVALID_PATH;
+      return mbf_msgs::ExePathResult::INVALID_PATH;
     }
 
     //now we'll prune the plan based on the position of the robot
@@ -407,7 +409,7 @@ namespace base_local_planner {
 
     //if the global plan passed in is empty... we won't do anything
     if(transformed_plan.empty())
-      return move_base_flex_msgs::ExePathResult::INVALID_PATH;
+      return mbf_msgs::ExePathResult::INVALID_PATH;
 
     tf::Stamped<tf::Pose> goal_point;
     tf::poseStampedMsgToTF(transformed_plan.back(), goal_point);
@@ -452,7 +454,7 @@ namespace base_local_planner {
         //if we're not stopped yet... we want to stop... taking into account the acceleration limits of the robot
         if ( ! rotating_to_goal_ && !base_local_planner::stopped(base_odom, rot_stopped_velocity_, trans_stopped_velocity_)) {
           if ( ! stopWithAccLimits(global_pose, robot_vel, cmd_vel.twist)) {
-            return move_base_flex_msgs::ExePathResult::NO_VALID_CMD;
+            return mbf_msgs::ExePathResult::NO_VALID_CMD;
           }
         }
         //if we're stopped... then we want to rotate to goal
@@ -460,7 +462,7 @@ namespace base_local_planner {
           //set this so that we know its OK to be moving
           rotating_to_goal_ = true;
           if(!rotateToGoal(global_pose, robot_vel, goal_th, cmd_vel.twist)) {
-            return move_base_flex_msgs::ExePathResult::NO_VALID_CMD;
+            return mbf_msgs::ExePathResult::NO_VALID_CMD;
           }
         }
       }
@@ -470,7 +472,7 @@ namespace base_local_planner {
       publishPlan(local_plan, l_plan_pub_);
 
       //we don't actually want to run the controller when we're just rotating to goal
-      return move_base_flex_msgs::ExePathResult::SUCCESS;
+      return mbf_msgs::ExePathResult::SUCCESS;
     }
 
     tc_->updatePlan(transformed_plan);
@@ -499,7 +501,7 @@ namespace base_local_planner {
       local_plan.clear();
       publishPlan(transformed_plan, g_plan_pub_);
       publishPlan(local_plan, l_plan_pub_);
-      return false;
+      return mbf_msgs::ExePathResult::NO_VALID_CMD;
     }
 
     ROS_DEBUG_NAMED("trajectory_planner_ros", "A valid velocity command of (%.2f, %.2f, %.2f) was found for this cycle.",
@@ -523,7 +525,8 @@ namespace base_local_planner {
     //publish information to the visualizer
     publishPlan(transformed_plan, g_plan_pub_);
     publishPlan(local_plan, l_plan_pub_);
-    return true;
+
+    return mbf_msgs::ExePathResult::SUCCESS;
   }
 
   bool TrajectoryPlannerROS::checkTrajectory(double vx_samp, double vy_samp, double vtheta_samp, bool update_map){
@@ -594,6 +597,6 @@ namespace base_local_planner {
       return false;
     }
     //return flag set in controller
-    return reached_goal_; 
+    return reached_goal_;
   }
 };
