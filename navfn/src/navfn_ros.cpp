@@ -47,8 +47,8 @@
 
 //register this planner both as a nav_core-based BaseGlobalPlanner and as a mbf_costmap_core-based
 //CostmapPlanner plugin to achieve dual move_base and move_base_flex compatibility
-PLUGINLIB_DECLARE_CLASS(navfn, NavfnROS, navfn::NavfnROS, mbf_costmap_core::CostmapPlanner)
-PLUGINLIB_DECLARE_CLASS(navfn, NavfnROS, navfn::NavfnROS, nav_core::BaseGlobalPlanner)
+PLUGINLIB_EXPORT_CLASS(navfn::NavfnROS, mbf_costmap_core::CostmapPlanner)
+PLUGINLIB_EXPORT_CLASS(navfn::NavfnROS, nav_core::BaseGlobalPlanner)
 
 namespace navfn {
 
