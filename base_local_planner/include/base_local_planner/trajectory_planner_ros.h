@@ -116,12 +116,16 @@ namespace base_local_planner {
        * @param cmd_vel Will be filled with the velocity command to be passed to the robot base
        * @return True if a valid trajectory was found, false otherwise
        */
-      uint32_t computeVelocityCommands(geometry_msgs::TwistStamped& cmd_vel, std::string& message);
+      uint32_t computeVelocityCommands(const geometry_msgs::PoseStamped& pose,
+                                       const geometry_msgs::TwistStamped& velocity,
+                                       geometry_msgs::TwistStamped& cmd_vel, std::string& message);
 
       bool computeVelocityCommands(geometry_msgs::Twist& cmd_vel){
         std::string message;
+        geometry_msgs::PoseStamped pose;
+        geometry_msgs::TwistStamped velocity;
         geometry_msgs::TwistStamped tmp_cmd_vel;
-        uint32_t ret = computeVelocityCommands(tmp_cmd_vel, message);
+        uint32_t ret = computeVelocityCommands(pose, velocity, tmp_cmd_vel, message);
         cmd_vel = tmp_cmd_vel.twist;
         return ret == mbf_msgs::ExePathResult::SUCCESS ? true : false;
       }

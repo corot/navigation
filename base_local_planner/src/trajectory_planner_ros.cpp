@@ -372,7 +372,9 @@ namespace base_local_planner {
     return true;
   }
 
-  uint32_t TrajectoryPlannerROS::computeVelocityCommands(geometry_msgs::TwistStamped& cmd_vel, std::string& message){
+  uint32_t TrajectoryPlannerROS::computeVelocityCommands(const geometry_msgs::PoseStamped& pose,
+                                                         const geometry_msgs::TwistStamped& velocity,
+                                                         geometry_msgs::TwistStamped& cmd_vel, std::string& message){
     if (! isInitialized()) {
       ROS_ERROR("This planner has not been initialized, please call initialize() before using this planner");
       return mbf_msgs::ExePathResult::NOT_INITIALIZED;
